@@ -29,4 +29,34 @@ export class LoginPageComponent {
       },
     });
   }
+
+  loginWithMicrosoft(): void {
+    this.error = '';
+    this.loading = true;
+
+    this.auth.startMicrosoftLogin().subscribe({
+      error: (err) => {
+        this.loading = false;
+        this.error =
+          err instanceof HttpErrorResponse
+            ? err.error?.message || 'No se pudo iniciar el flujo con Microsoft'
+            : 'No se pudo iniciar el flujo con Microsoft';
+      },
+    });
+  }
+
+  loginWithGitHub(): void {
+    this.error = '';
+    this.loading = true;
+
+    this.auth.startGithubLogin().subscribe({
+      error: (err) => {
+        this.loading = false;
+        this.error =
+          err instanceof HttpErrorResponse
+            ? err.error?.message || 'No se pudo iniciar el flujo con GitHub'
+            : 'No se pudo iniciar el flujo con GitHub';
+      },
+    });
+  }
 }

@@ -28,27 +28,36 @@ export class AuthCallbackPageComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly auth = inject(AuthService);
 
-  message = 'Validando acceso con Google...';
+  message = 'Validando acceso...';
 
   ngOnInit(): void {
     const code = this.route.snapshot.queryParamMap.get('code');
     const error = this.route.snapshot.queryParamMap.get('error');
+    const state = this.route.snapshot.queryParamMap.get('state') || 'google';
+
+    const providerName: Record<string, string> = {
+      google: 'Google',
+      microsoft: 'Microsoft',
+      github: 'GitHub',
+    };
+    const name = providerName[state] || state;
+    this.message = `Validando acceso con ${name}...`;
 
     if (error) {
-      this.message = 'Google rechazo la autenticacion. Intenta de nuevo.';
+      this.message = `${name} rechazo la autenticacion. Intenta de nuevo.`;
       setTimeout(() => this.router.navigateByUrl('/login'), 2500);
       return;
     }
 
     if (!code) {
-      this.message = 'No se recibio el codigo de Google.';
+      this.message = `No se recibio el codigo de ${name}.`;
       setTimeout(() => this.router.navigateByUrl('/login'), 2500);
       return;
     }
 
     const redirectUri = `${environment.authRedirectUri}`;
 
-    this.auth.completeGoogleCallback(code, redirectUri).subscribe({
+    this.auth.completeOAuthCallback(state, code, redirectUri).subscribe({
       next: (response) => this.handleSuccess(response),
       error: (err) => this.handleError(err),
     });

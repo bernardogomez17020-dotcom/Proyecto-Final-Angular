@@ -89,10 +89,11 @@ export class MapPageComponent implements AfterViewInit, OnDestroy {
   annotationForm = {
     description: '',
     id_citizen: 0,
-    id_category: 0,
-    id_entity: 0,
     status: 'open',
   };
+
+  annotationCategorySelections = new Set<number>();
+  annotationEntitySelections = new Set<number>();
 
   voteForm = { stars: 5, comment: '' };
   voteCitizenId = 0;
@@ -286,6 +287,22 @@ export class MapPageComponent implements AfterViewInit, OnDestroy {
     );
   }
 
+  toggleAnnotationCategory(id: number): void {
+    if (this.annotationCategorySelections.has(id)) {
+      this.annotationCategorySelections.delete(id);
+    } else {
+      this.annotationCategorySelections.add(id);
+    }
+  }
+
+  toggleAnnotationEntity(id: number): void {
+    if (this.annotationEntitySelections.has(id)) {
+      this.annotationEntitySelections.delete(id);
+    } else {
+      this.annotationEntitySelections.add(id);
+    }
+  }
+
   toggleCategoryExpand(id: number): void {
     if (this.expandedCategoryIds.has(id)) {
       this.expandedCategoryIds.delete(id);
@@ -349,24 +366,35 @@ export class MapPageComponent implements AfterViewInit, OnDestroy {
     return this.draftVertices.length;
   }
 
-  annotationCategoryDetail(annotationId: number): { parentName: string; subName: string } {
-    const link = this.annotationCategories.find((item) => item.id_annotation === annotationId);
-    if (!link) {
-      return { parentName: '—', subName: '—' };
-    }
+  annotationAllCategories(annotationId: number): Array<{ parentName: string; subName: string }> {
+    const links = this.annotationCategories.filter((item) => item.id_annotation === annotationId);
+    if (!links.length) return [];
 
-    const category = this.categories.find((item) => item.id_category === link.id_category);
-    if (!category) {
-      return { parentName: '—', subName: '—' };
-    }
+    return links.map((link) => {
+      const category = this.categories.find((item) => item.id_category === link.id_category);
+      if (!category) return { parentName: '—', subName: '—' };
 
-    if (category.id_parent_category) {
-      const parent = this.categories.find((item) => item.id_category === category.id_parent_category);
-      return { parentName: parent?.name || '—', subName: category.name };
-    }
+      if (category.id_parent_category) {
+        const parent = this.categories.find((item) => item.id_category === category.id_parent_category);
+        return { parentName: parent?.name || '—', subName: category.name };
+      }
 
-    const child = this.subcategories(category.id_category)[0];
-    return { parentName: category.name, subName: child?.name || '—' };
+      return { parentName: category.name, subName: '—' };
+    });
+  }
+
+  averageRatingValue(annotationId: number): number {
+    const related = this.votes.filter((v) => v.id_annotation === annotationId);
+    if (!related.length) return 0;
+    return related.reduce((sum, v) => sum + v.stars, 0) / related.length;
+  }
+
+  starsArray(value: number): boolean[] {
+    return Array.from({ length: 5 }, (_, i) => i < Math.round(value));
+  }
+
+  voteCount(annotationId: number): number {
+    return this.votes.filter((v) => v.id_annotation === annotationId).length;
   }
 
   saveAnnotation(): void {
@@ -407,33 +435,23 @@ export class MapPageComponent implements AfterViewInit, OnDestroy {
 
     this.api.createAnnotation(payload).subscribe({
       next: (created) => {
-        if (this.annotationForm.id_category) {
+        this.annotationCategorySelections.forEach((id_category) => {
           this.api
-            .createAnnotationCategory({
-              id_annotation: created.id_annotation,
-              id_category: this.annotationForm.id_category,
-            })
+            .createAnnotationCategory({ id_annotation: created.id_annotation, id_category })
             .subscribe();
-        }
+        });
 
-        if (this.annotationForm.id_entity) {
+        this.annotationEntitySelections.forEach((id_entity) => {
           this.api
-            .createInterestedParty({
-              id_annotation: created.id_annotation,
-              id_entity: this.annotationForm.id_entity,
-            })
+            .createInterestedParty({ id_annotation: created.id_annotation, id_entity })
             .subscribe();
-        }
+        });
 
         this.uploadEvidences(created.id_annotation);
         this.message = 'Anotacion creada';
-        this.annotationForm = {
-          description: '',
-          id_citizen: 0,
-          id_category: 0,
-          id_entity: 0,
-          status: 'open',
-        };
+        this.annotationForm = { description: '', id_citizen: 0, status: 'open' };
+        this.annotationCategorySelections = new Set();
+        this.annotationEntitySelections = new Set();
         this.annotationLatLng = null;
         this.applyCitizenDefaults();
         this.loadCatalogs();

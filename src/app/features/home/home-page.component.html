@@ -1,25 +1,55 @@
 <section class="home">
-  <h1>Sistema de valoracion territorial</h1>
-  <p>Bienvenido, {{ auth.user()?.name }}. Rol activo: <strong>{{ auth.user()?.role }}</strong>.</p>
+  <div class="home-header">
+    <div>
+      <h1>Sistema de valoracion territorial</h1>
+      <p class="subtitle">Bienvenido, <strong>{{ auth.user()?.name }}</strong> &mdash; {{ auth.user()?.role }}</p>
+    </div>
+  </div>
 
-  <div class="cards">
+  @if (loading) {
+    <p class="hint">Cargando estadisticas...</p>
+  } @else {
+    <div class="stats-grid">
+      <div class="stat-card accent-blue">
+        <span class="stat-value">{{ stats.annotations }}</span>
+        <span class="stat-label">Anotaciones totales</span>
+        <span class="stat-sub">{{ stats.openAnnotations }} abiertas</span>
+      </div>
+      <div class="stat-card accent-teal">
+        <span class="stat-value">{{ stats.neighborhoods }}</span>
+        <span class="stat-label">Barrios registrados</span>
+        <span class="stat-sub">{{ stats.demarcatedNeighborhoods }} demarcados</span>
+      </div>
+      <div class="stat-card accent-amber">
+        <span class="stat-value">{{ stats.citizens }}</span>
+        <span class="stat-label">Ciudadanos</span>
+      </div>
+      @if (auth.hasRole('administrador')) {
+        <div class="stat-card accent-violet">
+          <span class="stat-value">{{ stats.entities }}</span>
+          <span class="stat-label">Entidades</span>
+          <span class="stat-sub">{{ stats.officials }} funcionarios</span>
+        </div>
+      }
+    </div>
+  }
+
+  <div class="modules-grid">
     @if (auth.hasRole('administrador')) {
-      <article>
+      <a class="module-card" routerLink="/admin/entidades">
         <h2>Administracion</h2>
         <p>Entidades, funcionarios, ciudadanos, categorias, comunas y barrios.</p>
-      </article>
+      </a>
     }
-
-    <article>
+    <a class="module-card" routerLink="/mapa">
       <h2>Mapa territorial</h2>
-      <p>Demarcacion, anotaciones, filtros por categoria y calificaciones.</p>
-    </article>
-
+      <p>Demarcacion de barrios, anotaciones geolocalizadas y seguimiento GPS.</p>
+    </a>
     @if (auth.hasRole('administrador', 'funcionario')) {
-      <article>
+      <a class="module-card" routerLink="/consultas">
         <h2>Reportes inteligentes</h2>
-        <p>Consultas en lenguaje natural y graficas con ApexCharts.</p>
-      </article>
+        <p>Consultas en lenguaje natural con graficas interactivas.</p>
+      </a>
     }
   </div>
 </section>

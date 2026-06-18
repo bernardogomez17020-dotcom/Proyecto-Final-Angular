@@ -1,29 +1,100 @@
 <section>
-  <div class="page-header"><div><h1>Gestionar comunas</h1></div><button class="btn btn-secondary" (click)="reset()">Nueva</button></div>
+  <div class="page-header">
+    <div><h1>Gestionar comunas</h1></div>
+    <button class="btn btn-secondary" (click)="reset()">Nueva</button>
+  </div>
+
   @if (error) { <div class="alert error">{{ error }}</div> }
   @if (message) { <div class="alert success">{{ message }}</div> }
+
   <div class="panel">
+    <p class="api-badge">Departamentos y ciudades verificados con <strong>API Colombia</strong></p>
+
     <div class="form-grid">
-      <label>Departamento
-        <select [(ngModel)]="selectedDepartmentId" (ngModelChange)="onDepartmentChange()">
-          <option [ngValue]="0">Todos</option>
-          @for (d of departments; track d.id_department) { <option [ngValue]="d.id_department">{{ d.name }}</option> }
-        </select>
-      </label>
-      <label>Ciudad
-        <select [(ngModel)]="form.id_city">
-          <option [ngValue]="0">Seleccione</option>
-          @for (c of filteredCities; track c.id_city) { <option [ngValue]="c.id_city">{{ c.name }}</option> }
-        </select>
-      </label>
+      <div class="autocomplete-field">
+        <label>Departamento</label>
+        <input
+          type="text"
+          [(ngModel)]="deptQuery"
+          (ngModelChange)="onDeptQueryChange()"
+          placeholder="Buscar departamento..."
+          autocomplete="off"
+        />
+        @if (showDeptDropdown) {
+          <ul class="suggestions">
+            @for (d of deptSuggestions; track d.id) {
+              <li (mousedown)="selectDept(d)">{{ d.name }}</li>
+            }
+          </ul>
+        }
+        @if (selectedColombiaDept) {
+          <span class="verified-tag">✓ {{ selectedColombiaDept.name }}</span>
+        }
+      </div>
+
+      <div class="autocomplete-field">
+        <label>Ciudad</label>
+        @if (loadingCities) {
+          <p class="hint">Cargando ciudades...</p>
+        } @else {
+          <input
+            type="text"
+            [(ngModel)]="cityQuery"
+            (ngModelChange)="onCityQueryChange()"
+            placeholder="Buscar ciudad..."
+            autocomplete="off"
+            [disabled]="!selectedColombiaDept"
+          />
+          @if (showCityDropdown) {
+            <ul class="suggestions">
+              @for (c of citySuggestions; track c.id) {
+                <li (mousedown)="selectCity(c)">{{ c.name }}</li>
+              }
+            </ul>
+          }
+          @if (selectedColombiaCity) {
+            <span class="verified-tag">✓ {{ selectedColombiaCity.name }}</span>
+          }
+        }
+      </div>
+
       <label>Nombre comuna<input [(ngModel)]="form.name" /></label>
-      <label>Estado<select [(ngModel)]="form.status"><option value="active">Activa</option><option value="inactive">Inactiva</option></select></label>
+      <label>Estado
+        <select [(ngModel)]="form.status">
+          <option value="active">Activa</option>
+          <option value="inactive">Inactiva</option>
+        </select>
+      </label>
     </div>
+
     <button class="btn btn-primary" (click)="save()">{{ editingId ? 'Actualizar' : 'Guardar' }}</button>
   </div>
+
   <div class="panel">
-    <table><thead><tr><th>Nombre</th><th>Ciudad</th><th>Estado</th><th>Acciones</th></tr></thead>
-      <tbody>@for (item of items; track item.id_commune) {<tr><td>{{ item.name }}</td><td>{{ cityName(item.id_city) }}</td><td>{{ item.status }}</td><td class="actions"><button class="btn btn-secondary" (click)="edit(item)">Editar</button><button class="btn btn-danger" (click)="remove(item)">Eliminar</button></td></tr>}</tbody>
+    <table>
+      <thead>
+        <tr>
+          <th>Nombre</th>
+          <th>Departamento</th>
+          <th>Ciudad</th>
+          <th>Estado</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (item of items; track item.id_commune) {
+          <tr>
+            <td>{{ item.name }}</td>
+            <td>{{ deptNameForCity(item.id_city) }}</td>
+            <td>{{ cityName(item.id_city) }}</td>
+            <td>{{ item.status }}</td>
+            <td class="actions">
+              <button class="btn btn-secondary" (click)="edit(item)">Editar</button>
+              <button class="btn btn-danger" (click)="remove(item)">Eliminar</button>
+            </td>
+          </tr>
+        }
+      </tbody>
     </table>
   </div>
 </section>

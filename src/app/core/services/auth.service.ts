@@ -39,26 +39,42 @@ export class AuthService {
   }
 
   startGoogleLogin(): Observable<GoogleAuthConfig> {
-    return this.getGoogleConfig().pipe(
+    return this._startOAuthLogin('google', { access_type: 'online', prompt: 'select_account' });
+  }
+
+  startMicrosoftLogin(): Observable<GoogleAuthConfig> {
+    return this._startOAuthLogin('microsoft', { response_mode: 'query' });
+  }
+
+  startGithubLogin(): Observable<GoogleAuthConfig> {
+    return this._startOAuthLogin('github', {});
+  }
+
+  private _startOAuthLogin(provider: string, extra: Record<string, string>): Observable<GoogleAuthConfig> {
+    return this.http.get<GoogleAuthConfig>(`${this.apiUrl}/auth/${provider}/config`).pipe(
       tap((config) => {
         const params = new URLSearchParams({
           client_id: config.clientId,
           redirect_uri: config.redirectUri,
           response_type: 'code',
           scope: config.scope,
-          access_type: 'online',
-          prompt: 'select_account',
+          state: provider,
+          ...extra,
         });
         window.location.href = `${config.authUrl}?${params.toString()}`;
       }),
     );
   }
 
-  completeGoogleCallback(code: string, redirectUri: string): Observable<AuthSessionResponse | NeedsProfileResponse> {
-    return this.http.post<AuthSessionResponse | NeedsProfileResponse>(`${this.apiUrl}/auth/google/callback`, {
+  completeOAuthCallback(provider: string, code: string, redirectUri: string): Observable<AuthSessionResponse | NeedsProfileResponse> {
+    return this.http.post<AuthSessionResponse | NeedsProfileResponse>(`${this.apiUrl}/auth/${provider}/callback`, {
       code,
       redirectUri,
     });
+  }
+
+  completeGoogleCallback(code: string, redirectUri: string): Observable<AuthSessionResponse | NeedsProfileResponse> {
+    return this.completeOAuthCallback('google', code, redirectUri);
   }
 
   completeCitizenProfile(payload: {

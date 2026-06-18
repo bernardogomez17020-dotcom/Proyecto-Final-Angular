@@ -2,7 +2,7 @@
   <section class="card">
     <h1>Iniciar sesion</h1>
     <p class="subtitle">
-      Usa tu cuenta de Google. El sistema asignara tu rol segun los datos registrados en la plataforma.
+      Selecciona un proveedor para iniciar sesion. El sistema asignara tu rol segun los datos registrados en la plataforma.
     </p>
 
     @if (error) {
@@ -13,8 +13,12 @@
       <button type="button" class="provider google" [disabled]="loading" (click)="loginWithGoogle()">
         {{ loading ? 'Redirigiendo...' : 'Continuar con Google' }}
       </button>
-      <button type="button" class="provider disabled" disabled>Microsoft (proximamente)</button>
-      <button type="button" class="provider disabled" disabled>GitHub (proximamente)</button>
+      <button type="button" class="provider microsoft" [disabled]="loading" (click)="loginWithMicrosoft()">
+        Continuar con Microsoft
+      </button>
+      <button type="button" class="provider github" [disabled]="loading" (click)="loginWithGitHub()">
+        Continuar con GitHub
+      </button>
     </div>
 
     <p class="hint">

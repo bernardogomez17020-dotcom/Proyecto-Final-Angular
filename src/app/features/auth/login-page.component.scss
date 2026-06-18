@@ -64,8 +64,11 @@ select {
   color: #fff;
 }
 
-.google { background: #ea4335; }
-.disabled { background: #94a3b8; cursor: not-allowed; }
+.google    { background: #ea4335; }
+.microsoft { background: #0078d4; }
+.github    { background: #24292e; }
+
+.provider:disabled { opacity: 0.6; cursor: not-allowed; }
 
 .alert {
   background: #fee2e2;

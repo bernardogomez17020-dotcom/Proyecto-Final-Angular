@@ -1,2 +1,72 @@
 @use '../../../shared/styles/admin-page';
-.eyebrow { margin: 0; font-size: 0.75rem; text-transform: uppercase; color: #0f766e; }
+
+.api-badge {
+  font-size: 0.8rem;
+  color: #475569;
+  margin: 0 0 1rem;
+}
+
+.autocomplete-field {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+
+  label {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #374151;
+  }
+
+  input {
+    width: 100%;
+    padding: 0.45rem 0.6rem;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-size: 0.9rem;
+
+    &:disabled {
+      background: #f1f5f9;
+      cursor: not-allowed;
+    }
+  }
+}
+
+.suggestions {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background: #fff;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  list-style: none;
+  margin: 2px 0 0;
+  padding: 0.25rem 0;
+  max-height: 220px;
+  overflow-y: auto;
+
+  li {
+    padding: 0.45rem 0.75rem;
+    font-size: 0.88rem;
+    cursor: pointer;
+
+    &:hover {
+      background: #f1f5f9;
+    }
+  }
+}
+
+.verified-tag {
+  font-size: 0.78rem;
+  color: #0f766e;
+  font-weight: 600;
+}
+
+.hint {
+  font-size: 0.82rem;
+  color: #94a3b8;
+  margin: 0;
+}

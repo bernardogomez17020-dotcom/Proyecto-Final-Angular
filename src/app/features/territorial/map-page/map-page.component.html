@@ -72,24 +72,42 @@
               </select>
             </label>
           }
-          <label>
-            Categoria
-            <select [(ngModel)]="annotationForm.id_category">
-              <option [ngValue]="0">Seleccione</option>
-              @for (c of categories; track c.id_category) {
-                <option [ngValue]="c.id_category">{{ c.name }}</option>
+          <div class="field-group">
+            <span class="field-label">Categorias</span>
+            @for (parent of parentCategories(); track parent.id_category) {
+              <label class="check-row">
+                <input
+                  type="checkbox"
+                  [checked]="annotationCategorySelections.has(parent.id_category)"
+                  (change)="toggleAnnotationCategory(parent.id_category)"
+                />
+                {{ parent.name }}
+              </label>
+              @for (child of subcategories(parent.id_category); track child.id_category) {
+                <label class="check-row child">
+                  <input
+                    type="checkbox"
+                    [checked]="annotationCategorySelections.has(child.id_category)"
+                    (change)="toggleAnnotationCategory(child.id_category)"
+                  />
+                  {{ child.name }}
+                </label>
               }
-            </select>
-          </label>
-          <label>
-            Entidad interesada
-            <select [(ngModel)]="annotationForm.id_entity">
-              <option [ngValue]="0">Opcional</option>
-              @for (e of entities; track e.id_entity) {
-                <option [ngValue]="e.id_entity">{{ e.name }}</option>
-              }
-            </select>
-          </label>
+            }
+          </div>
+          <div class="field-group">
+            <span class="field-label">Entidades interesadas</span>
+            @for (e of entities; track e.id_entity) {
+              <label class="check-row">
+                <input
+                  type="checkbox"
+                  [checked]="annotationEntitySelections.has(e.id_entity)"
+                  (change)="toggleAnnotationEntity(e.id_entity)"
+                />
+                {{ e.name }}
+              </label>
+            }
+          </div>
           <label>
             Evidencias
             <input type="file" accept="image/*" multiple (change)="onFilesSelected($event)" />
@@ -161,15 +179,49 @@
       @if (selectedAnnotation) {
         <div class="block">
           <h3>Detalle anotacion</h3>
-          <p>{{ selectedAnnotation.description }}</p>
-          <p>Barrio: {{ neighborhoodName(selectedAnnotation.id_neighborhood) }}</p>
-          <p>Categoria: {{ annotationCategoryDetail(selectedAnnotation.id_annotation).parentName }}</p>
-          <p>Subcategoria: {{ annotationCategoryDetail(selectedAnnotation.id_annotation).subName }}</p>
-          <p>
-            Fecha:
-            {{ selectedAnnotation.registration_date || 'Sin fecha' }}
-          </p>
-          <p>Calificacion: {{ averageRating(selectedAnnotation.id_annotation) }}</p>
+          <p class="annotation-desc">{{ selectedAnnotation.description }}</p>
+
+          <div class="detail-row">
+            <span class="detail-label">Barrio</span>
+            <span>{{ neighborhoodName(selectedAnnotation.id_neighborhood) }}</span>
+          </div>
+
+          <div class="detail-row">
+            <span class="detail-label">Fecha</span>
+            <span>{{ selectedAnnotation.registration_date || 'Sin fecha' }}</span>
+          </div>
+
+          @if (annotationAllCategories(selectedAnnotation.id_annotation).length) {
+            <div class="detail-row">
+              <span class="detail-label">Categorias</span>
+              <span class="categories-list">
+                @for (cat of annotationAllCategories(selectedAnnotation.id_annotation); track cat.parentName) {
+                  <span class="cat-tag">
+                    {{ cat.parentName }}@if (cat.subName !== '—') { &rsaquo; {{ cat.subName }} }
+                  </span>
+                }
+              </span>
+            </div>
+          } @else {
+            <div class="detail-row">
+              <span class="detail-label">Categorias</span>
+              <span class="muted">Sin categorias</span>
+            </div>
+          }
+
+          <div class="detail-row">
+            <span class="detail-label">Calificacion</span>
+            <span class="stars-row">
+              @for (filled of starsArray(averageRatingValue(selectedAnnotation.id_annotation)); track $index) {
+                <span [class.star-filled]="filled" [class.star-empty]="!filled">{{ filled ? '★' : '☆' }}</span>
+              }
+              @if (averageRatingValue(selectedAnnotation.id_annotation) > 0) {
+                <span class="rating-num">{{ averageRatingValue(selectedAnnotation.id_annotation).toFixed(1) }} ({{ voteCount(selectedAnnotation.id_annotation) }})</span>
+              } @else {
+                <span class="muted">Sin calificaciones</span>
+              }
+            </span>
+          </div>
 
           @if (canManageAnnotationStatus()) {
             <label>
@@ -196,16 +248,25 @@
           }
 
           @if (auth.hasRole('ciudadano')) {
-            <h4>Calificar</h4>
-            <label>
-              Estrellas
-              <input type="number" min="1" max="5" [(ngModel)]="voteForm.stars" />
-            </label>
-            <label>
-              Comentario
-              <textarea [(ngModel)]="voteForm.comment"></textarea>
-            </label>
-            <button class="btn btn-primary" (click)="saveVote()">Guardar calificacion</button>
+            <div class="vote-section">
+              <h4>Calificar</h4>
+              <div class="star-input-row">
+                @for (star of [1,2,3,4,5]; track star) {
+                  <button
+                    type="button"
+                    class="star-btn"
+                    [class.selected]="star <= voteForm.stars"
+                    (click)="voteForm.stars = star"
+                  >★</button>
+                }
+                <span class="rating-num">{{ voteForm.stars }} / 5</span>
+              </div>
+              <label>
+                Comentario
+                <textarea [(ngModel)]="voteForm.comment" placeholder="Opcional..."></textarea>
+              </label>
+              <button class="btn btn-primary" (click)="saveVote()">Guardar calificacion</button>
+            </div>
           }
         </div>
       }
