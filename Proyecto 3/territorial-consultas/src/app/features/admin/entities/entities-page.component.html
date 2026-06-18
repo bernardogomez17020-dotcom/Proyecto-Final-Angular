@@ -1,0 +1,58 @@
+<section>
+  <div class="page-header">
+    <div>
+      <h1>Gestionar entidades</h1>
+    </div>
+    <button type="button" class="btn btn-secondary" (click)="reset()">Nueva entidad</button>
+  </div>
+
+  @if (error) { <div class="alert error">{{ error }}</div> }
+  @if (message) { <div class="alert success">{{ message }}</div> }
+
+  <div class="panel">
+    <div class="form-grid">
+      <label>Nombre<input [(ngModel)]="form.name" /></label>
+      <label>Descripcion<textarea [(ngModel)]="form.description"></textarea></label>
+      <label>Tipo de entidad
+        <select [(ngModel)]="form.entity_type">
+          <option value="publica">Publica</option>
+          <option value="privada">Privada</option>
+        </select>
+      </label>
+      <label>NIT<input [(ngModel)]="form.nit" /></label>
+      <label>Telefono<input [(ngModel)]="form.phone" /></label>
+      <label>Correo<input [(ngModel)]="form.email" /></label>
+      <label>Direccion<input [(ngModel)]="form.address" /></label>
+      <label>Estado
+        <select [(ngModel)]="form.status">
+          <option value="active">Activa</option>
+          <option value="inactive">Inactiva</option>
+        </select>
+      </label>
+      <label>Logo<input type="file" accept="image/*" (change)="onFileChange($event)" /></label>
+    </div>
+    <button type="button" class="btn btn-primary" (click)="save()">{{ editingId ? 'Actualizar' : 'Guardar' }}</button>
+  </div>
+
+  <div class="panel">
+    <table>
+      <thead>
+        <tr><th>Logo</th><th>Nombre</th><th>Correo</th><th>Estado</th><th>Acciones</th></tr>
+      </thead>
+      <tbody>
+        @for (item of items; track item.id_entity) {
+          <tr>
+            <td>@if (imageUrl(item); as src) { <img class="logo-preview" [src]="src" alt="logo" /> }</td>
+            <td>{{ item.name }}</td>
+            <td>{{ item.email }}</td>
+            <td>{{ item.status }}</td>
+            <td class="actions">
+              <button type="button" class="btn btn-secondary" (click)="edit(item)">Editar</button>
+              <button type="button" class="btn btn-danger" (click)="remove(item)">Eliminar</button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</section>

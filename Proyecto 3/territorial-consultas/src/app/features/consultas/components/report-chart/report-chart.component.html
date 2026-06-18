@@ -1,0 +1,18 @@
+@if (chartOptions) {
+  <apx-chart
+    [series]="chartOptions.series"
+    [chart]="chartOptions.chart"
+    [labels]="chartOptions.labels || []"
+    [xaxis]="chartOptions.xaxis || {}"
+    [yaxis]="chartOptions.yaxis || {}"
+    [dataLabels]="chartOptions.dataLabels || {}"
+    [stroke]="chartOptions.stroke || {}"
+    [legend]="chartOptions.legend || {}"
+    [tooltip]="chartOptions.tooltip || {}"
+    [plotOptions]="chartOptions.plotOptions || {}"
+    [grid]="chartOptions.grid || {}"
+    [colors]="chartOptions.colors || []"
+  />
+} @else {
+  <p class="empty-chart">No hay datos para visualizar.</p>
+}

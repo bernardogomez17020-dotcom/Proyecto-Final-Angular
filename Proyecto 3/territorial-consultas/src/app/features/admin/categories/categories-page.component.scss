@@ -1,0 +1,7 @@
+@use '../../../shared/styles/admin-page';
+
+.tree-node { margin-bottom: 0.5rem; }
+.tree-toggle { width: 100%; text-align: left; }
+.tree-child { margin: 0.25rem 0 0.25rem 1.25rem; font-size: 0.9rem; }
+.tree-child.muted { color: #64748b; }
+.eyebrow { margin: 0; font-size: 0.75rem; text-transform: uppercase; color: #0f766e; }

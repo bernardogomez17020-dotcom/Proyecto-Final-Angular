@@ -1,0 +1,38 @@
+<div class="layout">
+  <aside class="sidebar">
+    <div class="brand">
+      <h1>Valoracion Territorial</h1>
+      <p>{{ user()?.name }} · {{ user()?.role }}</p>
+    </div>
+
+    <nav>
+      <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Inicio</a>
+
+      @if (hasRole('administrador')) {
+        <span class="nav-group">Administracion</span>
+        <a routerLink="/admin/entidades" routerLinkActive="active">Entidades</a>
+        <a routerLink="/admin/funcionarios" routerLinkActive="active">Funcionarios</a>
+        <a routerLink="/admin/ciudadanos" routerLinkActive="active">Ciudadanos</a>
+        <a routerLink="/admin/categorias" routerLinkActive="active">Categorias</a>
+        <a routerLink="/admin/comunas" routerLinkActive="active">Comunas</a>
+        <a routerLink="/admin/barrios" routerLinkActive="active">Barrios</a>
+      }
+
+      @if (hasRole('administrador', 'funcionario', 'ciudadano')) {
+        <span class="nav-group">Territorio</span>
+        <a routerLink="/mapa" routerLinkActive="active">Mapa territorial</a>
+      }
+
+      @if (hasRole('administrador', 'funcionario')) {
+        <span class="nav-group">Reportes</span>
+        <a routerLink="/consultas" routerLinkActive="active">Consultas inteligentes</a>
+      }
+    </nav>
+
+    <button type="button" class="logout" (click)="logout()">Cerrar sesion</button>
+  </aside>
+
+  <main class="content">
+    <router-outlet />
+  </main>
+</div>

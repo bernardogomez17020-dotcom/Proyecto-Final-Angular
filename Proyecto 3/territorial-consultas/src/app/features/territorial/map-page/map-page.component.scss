@@ -1,0 +1,70 @@
+@use '../../../shared/styles/admin-page';
+
+.eyebrow { margin: 0; font-size: 0.75rem; text-transform: uppercase; color: #0f766e; }
+
+.layout {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 1rem;
+}
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-height: calc(100vh - 180px);
+  overflow: auto;
+}
+
+.block {
+  border-top: 1px solid #e2e8f0;
+  padding-top: 0.75rem;
+}
+
+.block h3,
+.block h4 {
+  margin: 0 0 0.5rem;
+  font-size: 0.95rem;
+}
+
+.block-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.filter-item {
+  display: flex;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  margin-bottom: 0.35rem;
+}
+
+.filter-item.child {
+  margin-left: 1rem;
+}
+
+.map-container {
+  min-height: 560px;
+}
+
+.mode-actions {
+  display: flex;
+  gap: 0.35rem;
+}
+
+.mode-actions .active {
+  background: #1d4ed8;
+  color: #fff;
+}
+
+.evidence {
+  width: 100%;
+  border-radius: 8px;
+  margin-top: 0.35rem;
+}
+
+@media (max-width: 900px) {
+  .layout { grid-template-columns: 1fr; }
+  .map-container { min-height: 420px; }
+}

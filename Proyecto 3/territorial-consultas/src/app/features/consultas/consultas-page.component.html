@@ -1,0 +1,104 @@
+<div class="consultas-page">
+  <header class="page-header">
+    <div>
+      <h1>Consultas territoriales</h1>
+      <p class="subtitle">
+        Consulta reportes en lenguaje natural y visualiza la respuesta con graficas.
+      </p>
+    </div>
+    <div class="test-actions">
+      <span class="test-label">Pruebas rapidas</span>
+      <button type="button" class="btn btn-secondary" [disabled]="loading" (click)="runTest('pie')">
+        Pie
+      </button>
+      <button type="button" class="btn btn-secondary" [disabled]="loading" (click)="runTest('bar')">
+        Bar
+      </button>
+      <button type="button" class="btn btn-secondary" [disabled]="loading" (click)="runTest('line')">
+        Line
+      </button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <section class="chat-panel card">
+      <h2>Chat de consultas</h2>
+
+      <div class="messages" aria-live="polite">
+        @for (message of messages; track message.id) {
+          <article class="message" [class.user]="message.role === 'user'" [class.system]="message.role === 'system'">
+            <span class="message-role">{{ message.role === 'user' ? 'Tu' : 'Sistema' }}</span>
+            <p>{{ message.text }}</p>
+            <time>{{ message.timestamp | date: 'shortTime' }}</time>
+          </article>
+        }
+
+        @if (loading) {
+          <article class="message system loading">
+            <span class="message-role">Sistema</span>
+            <p>Procesando consulta...</p>
+          </article>
+        }
+      </div>
+
+      <div class="examples">
+        <span>Ejemplos:</span>
+        @for (example of exampleQueries; track example) {
+          <button type="button" class="chip" (click)="useExample(example)">{{ example }}</button>
+        }
+      </div>
+
+      <form class="chat-form" (ngSubmit)="sendQuery()">
+        <input
+          type="text"
+          name="query"
+          [(ngModel)]="query"
+          placeholder="Ej: anotaciones por categoria"
+          [disabled]="loading"
+          autocomplete="off"
+        />
+        <button type="submit" class="btn btn-primary" [disabled]="loading || !query.trim()">
+          Consultar
+        </button>
+      </form>
+    </section>
+
+    <section class="chart-panel card">
+      <div class="chart-header">
+        <h2>Visualizacion</h2>
+        @if (currentReport && !isEmptyReport(currentReport)) {
+          <p class="suggested-type">
+            Tipo sugerido por el backend: <strong>{{ currentReport.type }}</strong>
+          </p>
+        }
+
+        <div class="view-modes">
+          @for (mode of viewModes; track mode.id) {
+            <div class="mode-item">
+              <button
+                type="button"
+                class="mode-btn"
+                [class.active]="selectedViewMode === mode.id"
+                [disabled]="isViewModeDisabled(mode.id)"
+                (click)="setViewMode(mode.id)"
+              >
+                {{ mode.label }}
+              </button>
+              @if (viewModeHint(mode.id); as hint) {
+                <small class="mode-hint">{{ hint }}</small>
+              }
+            </div>
+          }
+        </div>
+      </div>
+
+      @if (currentReport && !isViewModeDisabled(selectedViewMode)) {
+        <app-report-chart [report]="currentReport" [viewMode]="selectedViewMode" />
+      } @else {
+        <div class="chart-placeholder">
+          <p>El grafico aparecera aqui despues de enviar una consulta o ejecutar una prueba.</p>
+        </div>
+      }
+    </section>
+  </div>
+</div>

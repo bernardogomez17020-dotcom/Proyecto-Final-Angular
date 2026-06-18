@@ -1,0 +1,23 @@
+<section>
+  <div class="page-header"><div><h1>Gestionar funcionarios</h1></div><button class="btn btn-secondary" (click)="reset()">Nuevo</button></div>
+  @if (error) { <div class="alert error">{{ error }}</div> }
+  @if (message) { <div class="alert success">{{ message }}</div> }
+  <div class="panel">
+    <div class="form-grid">
+      <label>Entidad<select [(ngModel)]="form.id_entity"><option [ngValue]="0">Seleccione</option>@for (e of entities; track e.id_entity) { <option [ngValue]="e.id_entity">{{ e.name }}</option> }</select></label>
+      <label>Nombre<input [(ngModel)]="form.name" /></label>
+      <label>Correo<input [(ngModel)]="form.email" /></label>
+      <label>Cargo/Rol<input [(ngModel)]="form.role" /></label>
+      <label>Celular<input [(ngModel)]="form.phone" /></label>
+      <label>Estado<select [(ngModel)]="form.status"><option value="active">Activo</option><option value="inactive">Inactivo</option></select></label>
+      <label>GPS activo<input type="checkbox" [(ngModel)]="form.gps_active" /></label>
+      <p class="hint">Si GPS esta activo, se asigna ubicacion inicial en Manizales para el seguimiento simulado.</p>
+    </div>
+    <button class="btn btn-primary" (click)="save()">{{ editingId ? 'Actualizar' : 'Guardar' }}</button>
+  </div>
+  <div class="panel">
+    <table><thead><tr><th>Nombre</th><th>Correo</th><th>Entidad</th><th>Rol</th><th>Acciones</th></tr></thead>
+      <tbody>@for (item of items; track item.id_official) {<tr><td>{{ item.name }}</td><td>{{ item.email }}</td><td>{{ entityName(item.id_entity) }}</td><td>{{ item.role }}</td><td class="actions"><button class="btn btn-secondary" (click)="edit(item)">Editar</button><button class="btn btn-danger" (click)="remove(item)">Eliminar</button></td></tr>}</tbody>
+    </table>
+  </div>
+</section>

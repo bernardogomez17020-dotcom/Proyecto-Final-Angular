@@ -1,0 +1,24 @@
+<div class="login-page">
+  <section class="card">
+    <h1>Iniciar sesion</h1>
+    <p class="subtitle">
+      Usa tu cuenta de Google. El sistema asignara tu rol segun los datos registrados en la plataforma.
+    </p>
+
+    @if (error) {
+      <div class="alert">{{ error }}</div>
+    }
+
+    <div class="providers">
+      <button type="button" class="provider google" [disabled]="loading" (click)="loginWithGoogle()">
+        {{ loading ? 'Redirigiendo...' : 'Continuar con Google' }}
+      </button>
+      <button type="button" class="provider disabled" disabled>Microsoft (proximamente)</button>
+      <button type="button" class="provider disabled" disabled>GitHub (proximamente)</button>
+    </div>
+
+    <p class="hint">
+      Si tu correo no existe en el sistema, podras completar tu perfil como ciudadano despues de autenticarte.
+    </p>
+  </section>
+</div>

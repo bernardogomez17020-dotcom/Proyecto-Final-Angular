@@ -1,0 +1,48 @@
+<section>
+  <div class="page-header"><div><h1>Gestionar categorias y subcategorias</h1></div><button class="btn btn-secondary" (click)="reset()">Nueva</button></div>
+  @if (error) { <div class="alert error">{{ error }}</div> }
+  @if (message) { <div class="alert success">{{ message }}</div> }
+  <div class="panel">
+    <div class="form-grid">
+      <label>Nombre<input [(ngModel)]="form.name" /></label>
+      <label>Descripcion<textarea [(ngModel)]="form.description"></textarea></label>
+      <label>Categoria padre
+        <select [(ngModel)]="form.id_parent_category">
+          <option [ngValue]="null">Sin padre</option>
+          @for (parent of parentCategories(); track parent.id_category) {
+            <option [ngValue]="parent.id_category">{{ parent.name }}</option>
+          }
+        </select>
+      </label>
+      <label>Estado<select [(ngModel)]="form.status"><option value="active">Activa</option><option value="inactive">Inactiva</option></select></label>
+      <label>Imagen<input type="file" accept="image/*" (change)="onFileChange($event)" /></label>
+    </div>
+    <button class="btn btn-primary" (click)="save()">{{ editingId ? 'Actualizar' : 'Guardar' }}</button>
+  </div>
+  <div class="panel">
+    <h2>Arbol de categorias</h2>
+    @for (parent of parentCategories(); track parent.id_category) {
+      <div class="tree-node">
+        <button type="button" class="btn btn-secondary tree-toggle" (click)="toggleExpand(parent.id_category)">
+          {{ isExpanded(parent.id_category) ? '▼' : '▶' }} {{ parent.name }}
+        </button>
+        @if (isExpanded(parent.id_category)) {
+          @for (child of subcategories(parent.id_category); track child.id_category) {
+            <div class="tree-child">↳ {{ child.name }}</div>
+          } @empty {
+            <div class="tree-child muted">Sin subcategorias</div>
+          }
+        }
+      </div>
+    }
+  </div>
+  <div class="panel">
+    <table><thead><tr><th>Icono</th><th>Nombre</th><th>Padre</th><th>Estado</th><th>Acciones</th></tr></thead>
+      <tbody>@for (item of items; track item.id_category) {<tr>
+        <td>@if (imageUrl(item); as src) { <img class="logo-preview" [src]="src" alt="" /> }</td>
+        <td>{{ item.name }}</td><td>{{ parentName(item.id_parent_category) }}</td><td>{{ item.status }}</td>
+        <td class="actions"><button class="btn btn-secondary" (click)="edit(item)">Editar</button><button class="btn btn-danger" (click)="remove(item)">Eliminar</button></td>
+      </tr>}</tbody>
+    </table>
+  </div>
+</section>

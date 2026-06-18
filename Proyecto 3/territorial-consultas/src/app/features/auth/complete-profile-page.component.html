@@ -1,0 +1,29 @@
+<section class="profile-page">
+  <div class="card">
+    <h1>Completar perfil</h1>
+    <p class="subtitle">
+      Tu cuenta de Google no esta registrada. Completa estos datos para ingresar como ciudadano.
+    </p>
+
+    @if (error) {
+      <div class="alert">{{ error }}</div>
+    }
+
+    <div class="form-grid">
+      <label>Correo<input [value]="email" readonly /></label>
+      <label>Nombre<input [(ngModel)]="name" /></label>
+      <label>Celular<input [(ngModel)]="phone" /></label>
+      <label>Direccion<input [(ngModel)]="address" /></label>
+    </div>
+
+    <app-map-pin-picker
+      [latitude]="latitude"
+      [longitude]="longitude"
+      (locationChange)="onLocationChange($event)"
+    />
+
+    <button type="button" class="btn" [disabled]="loading" (click)="save()">
+      {{ loading ? 'Guardando...' : 'Crear perfil y entrar' }}
+    </button>
+  </div>
+</section>

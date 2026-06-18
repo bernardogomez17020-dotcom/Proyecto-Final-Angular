@@ -1,0 +1,216 @@
+<section class="map-page">
+  <div class="page-header">
+    <div>
+      <h1>Mapa territorial</h1>
+    </div>
+    <div class="mode-actions">
+      <button class="btn btn-secondary" [class.active]="mode === 'view'" (click)="setMode('view')">Ver</button>
+      @if (canDemarcate()) {
+        <button class="btn btn-secondary" [class.active]="mode === 'demarcate'" (click)="setMode('demarcate')">
+          Demarcar
+        </button>
+      }
+      <button class="btn btn-secondary" [class.active]="mode === 'annotate'" (click)="setMode('annotate')">
+        Anotar
+      </button>
+      @if (canTrack()) {
+        <button class="btn btn-secondary" [class.active]="mode === 'tracking'" (click)="setMode('tracking')">
+          Seguimiento GPS
+        </button>
+      }
+    </div>
+  </div>
+
+  @if (error) {
+    <div class="alert error">{{ error }}</div>
+  }
+  @if (message) {
+    <div class="alert success">{{ message }}</div>
+  }
+
+  <div class="layout">
+    <aside class="sidebar panel">
+      <label>
+        Barrio
+        <select [(ngModel)]="selectedNeighborhoodId" (ngModelChange)="onNeighborhoodChange()">
+          <option [ngValue]="0">Seleccione</option>
+          @for (n of neighborhoods; track n.id_neighborhood) {
+            <option [ngValue]="n.id_neighborhood">{{ n.name }}</option>
+          }
+        </select>
+      </label>
+
+      @if (mode === 'demarcate') {
+        <div class="block">
+          <h3>Demarcacion</h3>
+          <p>Selecciona un barrio y edita el poligono con puntos arrastrables.</p>
+          <p>Vertices: {{ draftVertexCount }}</p>
+          <button class="btn btn-primary" (click)="savePolygon()">Guardar poligono</button>
+          <button class="btn btn-secondary" (click)="removeLastVertex()">Eliminar ultimo vertice</button>
+          <button class="btn btn-secondary" (click)="clearDraft()">Limpiar borrador</button>
+        </div>
+      }
+
+      @if (mode === 'annotate') {
+        <div class="block">
+          <h3>Crear anotacion</h3>
+          <p>Haz clic en el mapa para detectar el barrio automaticamente.</p>
+          <label>
+            Descripcion
+            <textarea [(ngModel)]="annotationForm.description"></textarea>
+          </label>
+          @if (auth.hasRole('ciudadano')) {
+            <p>Ciudadano: {{ auth.user()?.name || 'Perfil ciudadano' }}</p>
+          } @else {
+            <label>
+              Ciudadano
+              <select [(ngModel)]="annotationForm.id_citizen">
+                <option [ngValue]="0">Seleccione</option>
+                @for (c of citizens; track c.id_citizen) {
+                  <option [ngValue]="c.id_citizen">{{ c.name }}</option>
+                }
+              </select>
+            </label>
+          }
+          <label>
+            Categoria
+            <select [(ngModel)]="annotationForm.id_category">
+              <option [ngValue]="0">Seleccione</option>
+              @for (c of categories; track c.id_category) {
+                <option [ngValue]="c.id_category">{{ c.name }}</option>
+              }
+            </select>
+          </label>
+          <label>
+            Entidad interesada
+            <select [(ngModel)]="annotationForm.id_entity">
+              <option [ngValue]="0">Opcional</option>
+              @for (e of entities; track e.id_entity) {
+                <option [ngValue]="e.id_entity">{{ e.name }}</option>
+              }
+            </select>
+          </label>
+          <label>
+            Evidencias
+            <input type="file" accept="image/*" multiple (change)="onFilesSelected($event)" />
+          </label>
+          <button class="btn btn-primary" (click)="saveAnnotation()">Guardar anotacion</button>
+        </div>
+      }
+
+      @if (mode === 'tracking') {
+        <div class="block">
+          <h3>Seguimiento</h3>
+          <label>
+            Filtrar por entidad
+            <select [(ngModel)]="selectedEntityFilter" (ngModelChange)="setMode('tracking')">
+              <option [ngValue]="0">Todas</option>
+              @for (e of entities; track e.id_entity) {
+                <option [ngValue]="e.id_entity">{{ e.name }}</option>
+              }
+            </select>
+          </label>
+          <p>Los marcadores se atenuan si no reciben actualizacion en 6 segundos.</p>
+        </div>
+      }
+
+      <div class="block">
+        <div class="block-header">
+          <h3>Filtros por categoria</h3>
+          <button class="btn btn-secondary" (click)="clearCategoryFilters()">Limpiar</button>
+        </div>
+
+        @if (showNoFilteredAnnotations()) {
+          <p>No hay anotaciones visibles con los filtros actuales.</p>
+        }
+
+        @for (parent of parentCategories(); track parent.id_category) {
+          <div class="filter-item">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              (click)="toggleCategoryExpand(parent.id_category)"
+            >
+              {{ isCategoryExpanded(parent.id_category) ? '−' : '+' }}
+            </button>
+            <label>
+              <input
+                type="checkbox"
+                [checked]="selectedCategoryFilters.has(parent.id_category)"
+                (change)="toggleCategoryFilter(parent.id_category)"
+              />
+              {{ parent.name }} ({{ categoryCount(parent.id_category) }})
+            </label>
+          </div>
+
+          @if (isCategoryExpanded(parent.id_category)) {
+            @for (child of subcategories(parent.id_category); track child.id_category) {
+              <label class="filter-item child">
+                <input
+                  type="checkbox"
+                  [checked]="selectedCategoryFilters.has(child.id_category)"
+                  (change)="toggleCategoryFilter(child.id_category)"
+                />
+                {{ child.name }} ({{ categoryCount(child.id_category) }})
+              </label>
+            }
+          }
+        }
+      </div>
+
+      @if (selectedAnnotation) {
+        <div class="block">
+          <h3>Detalle anotacion</h3>
+          <p>{{ selectedAnnotation.description }}</p>
+          <p>Barrio: {{ neighborhoodName(selectedAnnotation.id_neighborhood) }}</p>
+          <p>Categoria: {{ annotationCategoryDetail(selectedAnnotation.id_annotation).parentName }}</p>
+          <p>Subcategoria: {{ annotationCategoryDetail(selectedAnnotation.id_annotation).subName }}</p>
+          <p>
+            Fecha:
+            {{ selectedAnnotation.registration_date || 'Sin fecha' }}
+          </p>
+          <p>Calificacion: {{ averageRating(selectedAnnotation.id_annotation) }}</p>
+
+          @if (canManageAnnotationStatus()) {
+            <label>
+              Estado
+              <select [(ngModel)]="selectedAnnotation.status">
+                <option value="open">Abierta</option>
+                <option value="in_progress">En progreso</option>
+                <option value="closed">Cerrada</option>
+                <option value="rejected">Rechazada</option>
+              </select>
+            </label>
+
+            <button class="btn btn-primary" (click)="updateAnnotationStatus()">Actualizar estado</button>
+          }
+
+          @if (canDeleteSelectedAnnotation()) {
+            <button class="btn btn-secondary" (click)="deleteSelectedAnnotation()">Eliminar anotacion</button>
+          }
+
+          @for (ev of evidences; track ev.id_evidence) {
+            @if (evidenceUrl(ev.file_url); as src) {
+              <img class="evidence" [src]="src" alt="evidencia" />
+            }
+          }
+
+          @if (auth.hasRole('ciudadano')) {
+            <h4>Calificar</h4>
+            <label>
+              Estrellas
+              <input type="number" min="1" max="5" [(ngModel)]="voteForm.stars" />
+            </label>
+            <label>
+              Comentario
+              <textarea [(ngModel)]="voteForm.comment"></textarea>
+            </label>
+            <button class="btn btn-primary" (click)="saveVote()">Guardar calificacion</button>
+          }
+        </div>
+      }
+    </aside>
+
+    <div #mapContainer class="map-container panel"></div>
+  </div>
+</section>

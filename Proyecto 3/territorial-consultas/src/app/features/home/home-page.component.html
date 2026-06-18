@@ -1,0 +1,25 @@
+<section class="home">
+  <h1>Sistema de valoracion territorial</h1>
+  <p>Bienvenido, {{ auth.user()?.name }}. Rol activo: <strong>{{ auth.user()?.role }}</strong>.</p>
+
+  <div class="cards">
+    @if (auth.hasRole('administrador')) {
+      <article>
+        <h2>Administracion</h2>
+        <p>Entidades, funcionarios, ciudadanos, categorias, comunas y barrios.</p>
+      </article>
+    }
+
+    <article>
+      <h2>Mapa territorial</h2>
+      <p>Demarcacion, anotaciones, filtros por categoria y calificaciones.</p>
+    </article>
+
+    @if (auth.hasRole('administrador', 'funcionario')) {
+      <article>
+        <h2>Reportes inteligentes</h2>
+        <p>Consultas en lenguaje natural y graficas con ApexCharts.</p>
+      </article>
+    }
+  </div>
+</section>
